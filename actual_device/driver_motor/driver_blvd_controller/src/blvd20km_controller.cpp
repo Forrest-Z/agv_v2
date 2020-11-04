@@ -37,7 +37,8 @@ int main(int argc, char **argv)
 {
 	char port[30];    //port name
 	int baud;     	  //baud rate 
-	char topicPublish[30]; // topic name
+	//char topicPublish[30]; // topic name
+	
 
 	if (argc > 1) {
 		if(sscanf(argv[1],"%d", &ID)==1) {
@@ -71,6 +72,8 @@ int main(int argc, char **argv)
 	ros::Subscriber cmd_vel_to_wheel =  nh->subscribe("cmd_vel_to_wheel", 20,speedWheelCallback); 
 	/* Publisher */
 	ros::Publisher diagnostic_pub = nh->advertise<diagnostic_msgs::DiagnosticArray>("diagnostics", 20);
+
+	ros::Publisher encoder_pub = nh->advertise<driver_blvd_controller::speed_wheel>("encoder_wheel", 20);
     
 	diagnostic_msgs::DiagnosticArray dir_array;
 	diagnostic_msgs::DiagnosticStatus Driver;
@@ -86,6 +89,7 @@ int main(int argc, char **argv)
 	Driver.hardware_id = std::to_string(ID);
 
 	ros::Rate loop_rate(20); 
+	driver_blvd_controller::speed_wheel encoder_wheel;
 	while(ros::ok())
 	{
 		/* onpen comport */
@@ -131,6 +135,10 @@ int main(int argc, char **argv)
 			feedbackSpeed(ID, &feedback_speed[ID-1]);
 			readAlarm(ID, &alarm_status[ID-1]);
 			readWarning(ID, &warning_status[ID-1]);
+
+			if(ID = 1) encoder_wheel.wheel_letf =  feedback_speed[0]; 
+				else encoder_wheel.wheel_right =  feedback_speed[1]; 
+			encoder_pub.publish(encoder_wheel);
 			
 			Driver.values.clear();
 			
