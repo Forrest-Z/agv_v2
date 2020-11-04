@@ -1,0 +1,15 @@
+shutdown_costmaps: false        # (bool, default: false) Xac dinh co tat costmap hay khong khi move_base (Determines whether or not to shutdown the costmaps of the node when move_base is in an inactive state)
+controller_frequency: 20.0      # (double, default: 20Hz) Tan so xuat tin hieu dieu khien dong co (pub topic /cmd_vel) (The rate in Hz at which to run the control loop and send velocity commands to the base)
+planner_patience: 5.0           # (double, default: 5 s) Thoi gian de lap plan truoc khi xoa khong trong (How long the planner will wait in seconds in an attempt to find a valid plan before space-clearing operations are performed)
+controller_patience: 15.0       # (double, default: 15 s) Thoi gian bo dieu khien cho tin hieu truoc khi xoa khaong trong (How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed)
+conservative_reset_dist: 3.0    # (double, default: 3 m) Khoang cach xa robot vuot qua vat can truoc khi xoa khoi ban do (The distance away from the robot in meters beyond which obstacles will be cleared from the costmap when attempting to clear space in the map. Note, this parameter is only used when the default recovery behaviors are used for move_base)
+recovery_behavior_enabled: true # (bool, default: true) Enable/disable hanh vi khoi phuc move_base (Whether or not to enable the move_base recovery behaviors to attempt to clear out space)
+clearing_rotation_allowed: true # (bool, default: true) Cho phep robot xoay tai cho khi mat khong gian (Determines whether or not the robot will attempt an in-place rotation when attempting to clear out space. Note: This parameter is only used when the default recovery behaviors are in use, meaning the user has not set the recovery_behaviors parameter to anything custom)
+planner_frequency: 5.0          # (double, default: 0.0 Hz) Tan so tao global_planner. Neu dat la 0,0, global_planner se chi chay khi nhan duoc new goal hoac local_planner bao rang plan bi chan (The rate in Hz at which to run the global planning loop. If the frequency is set to 0.0, the global planner will only run when a new goal is received or the local planner reports that its path is blocked)
+oscillation_timeout: 10.0        # (double, default: 0.0 s) Khoang thoi gian cho phep dao dong truoc khi thuc hien hanh vi phuc hoi (How long in seconds to allow for oscillation before executing recovery behaviors. A value of 0.0 corresponds to an infinite timeout)
+oscillation_distance: 1       # (double, default: 0.5 m) (How far in meters the robot must move to be considered not to be oscillating. Moving this far resets the timer counting up to the ~oscillation_timeout)
+max_planning_retries: 1        # (int32_t, default: -1) So lan cho phep re-planner truoc khi recovery_behavior. Neu set -1 tuong ung voi re-planner vo han (How many times to allow for planning retries before executing recovery behaviors. A value of -1.0 corresponds to an infinite retries)
+
+# base_global_planner: "global_planner/GlobalPlanner"
+# base_global_planner: "navfn/NavfnROS"
+base_global_planner: "carrot_planner/CarrotPlanner"

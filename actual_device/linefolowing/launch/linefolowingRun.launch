@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- sick_line_guidance: global configuration -->
+  <arg name="yaml"/>
+  <rosparam command="load" file="$(find linefolowing)/config/$(arg yaml)" />                    
+  <!-- Global yaml-file incl. link to eds-file -->
+
+  <node pkg="linefolowing" type="linefolowersick" name="linefolowersick_forward" args = "0 " output="screen">
+  <rosparam command="load" file="$(find linefolowing)/config/$(arg yaml)" />   
+  </node>
+
+  <node pkg="linefolowing" type="linefolowersick" name="linefolowersick_backward" args = "1 " output="screen">
+  <rosparam command="load" file="$(find linefolowing)/config/$(arg yaml)" />   
+  </node>
+  
+  <include file="$(find sick_line_guidance)/launch/sick_line_guidance.launch">
+    <arg name="yaml" value="sick_line_guidance_mls.yaml"/>
+  </include>
+ 
+</launch>

@@ -1,0 +1,10 @@
+pub_rate: 0.5
+analyzers:
+  agv:
+    type: diagnostic_aggregator/AnalyzerGroup
+    path: Slam Agv
+    analyzers:
+      drivers:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: Motor driver
+        startswith: Oriental_BLVD20KM

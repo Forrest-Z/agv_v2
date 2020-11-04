@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Arguments -->
+  <arg name="topic_front"         default="/sick_safetyscanners_front"/>
+  <arg name="topic_back"          default="/sick_safetyscanners_back"/>
+  <arg name="sensor_ip_front"     default="192.168.1.12"/>
+  <arg name="sensor_ip_back"      default="192.168.1.13"/>
+  <arg name="host_ip"             default="192.168.1.255"/>
+  <arg name="host_udp_port_front" default="6060" />
+  <arg name="host_udp_port_back"  default="6061" />  
+  <!-- <arg name="angle_start_front"   default="-2" /> -->
+  <arg name="angle_start_front"   default="-0.1" /> 
+  <arg name="angle_end_front"     default="2" />
+  <arg name="angle_start_back"    default="-2" />
+  <arg name="angle_end_back"      default="2" />
+  <arg name="frame_id_front"      default="base_laser_front"/>
+  <arg name="frame_id_back"       default="base_laser_back"/>
+
+  <!-- MicroScan3 - sick_safetyscans -->
+  <include file="$(find sick_safetyscanners)/launch/sick_safetyscanners.launch">
+    <arg name="topic"         value="$(arg topic_front)"/>
+    <arg name="sensor_ip"     value="$(arg sensor_ip_front)"/>
+    <arg name="host_ip"       value="$(arg host_ip)"/>
+    <arg name="host_udp_port" value="$(arg host_udp_port_front)"/>
+    <arg name="frame_id"      value="$(arg frame_id_front)"/>
+    <arg name="angle_start"   value="$(arg angle_start_front)"/>
+    <arg name="angle_end"     value="$(arg angle_end_front)"/>
+  </include>
+
+  <!-- agv_v1 -->
+  <arg name="urdf_file" default="$(find xacro)/xacro --inorder '$(find agv_description)/urdf/agv_v1.urdf.xacro'" />
+  <param name="robot_description" command="$(arg urdf_file)" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+  </node>
+  
+  <!-- Map server -->
+  <!-- <arg name="map_file" default="$(find agv_main)/maps/lobbyA1.yaml"/> -->
+  <!-- <arg name="map_file" default="$(find agv_main)/maps/mapBuild.yaml"/> -->
+  <arg name="map_file" default="$(find agv_main)/maps/mapB4.yaml"/>
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- sick_lidar_localization -->
+  <arg name="sim1000_ip" default="192.168.1.1"/>
+  <include file="$(find sick_lidar_localization)/launch/sim_loc_driver.launch">
+    <arg name="localization_controller_ip_address" value="$(arg sim1000_ip)"/>
+  </include>
+
+  <include file="$(find agv_main)/launch/agv_main.launch"></include>
+
+  <!-- move_base -->
+  <arg name="move_forward_only" default="false"/>
+  <include file="$(find agv_main)/launch/move_base.launch">
+    <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+  </include>
+
+  <include file="$(find linefolowing)/launch/linefolowingRun.launch">
+    <arg name="yaml" value="concept_rb.yaml"/>
+  </include>
+
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
+
+  <!-- joint_state_publisher -->
+  <node pkg="joint_state_publisher" type="joint_state_publisher" respawn="false" name="joint_state_publisher" output="screen"/>
+
+  <!-- Motor Driver -->
+  <include file="$(find driver_blvd_controller)/launch/agvrun.launch"></include>
+
+  <!-- PLC -->
+  <include file="$(find plc_fx5uc)/launch/plc.launch"></include>
+
+  <!-- rviz -->
+  <!-- <arg name="open_rviz" default="true"/> -->
+  <arg name="open_rviz" default="false"/>
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find agv_main)/rviz/agv_main.rviz"/>
+  </group>
+
+  <node pkg="diagnostic_aggregator" type="aggregator_node" name="diag_agg" args="CPP" output="log" >
+    <rosparam command="load" file="$(find agv_main)/diagnostics/pr2_analyzers.yaml" />
+  </node>
+  
+</launch>

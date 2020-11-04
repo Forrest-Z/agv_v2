@@ -1,0 +1,21 @@
+# Info: http://wiki.ros.org/navigation/Tutorials/RobotSetup
+
+obstacle_range: 3.0      # Pham vi phat hien vat can (m) (parameter determines the maximum range sensor reading that will result in an obstacle being put into the costmap)
+raytrace_range: 3.5      # Khoang cach an toan de robot di chuyen (m) (parameter determines the range to which we will raytrace freespace given a sensor reading)
+
+# Info: Kich thuoc robot (tinh tu tam quay robot) - toa do 4 diem goc robot (m) (The footprint of the robot specified in the robot_base_frame coordinate frame as a list in the format: [ [x1, y1], [x2, y2], ...., [xn, yn] ])
+# footprint: [[-0.105, -0.105], [-0.105, 0.105], [0.041, 0.105], [0.041, -0.105]]  (turtlebot3: burger)
+# footprint: [[-0.2765, -0.305], [-0.2765, 0.305], [0.2765, 0.305], [0.2765, -0.305]]  (KIT AGV)
+# footprint: [[-0.525, -0.325], [-0.525, 0.325], [0.525, 0.325], [0.525, -0.325]]   (AGV_V1)
+# footprint: [[-0.5025, -0.4], [-0.5025, 0.4], [0.7, 0.4], [0.7, -0.4]]    
+footprint: [[-0.5, -0.35], [-0.5, 0.35], [0.55, 0.35], [0.55, -0.35]]    
+# robot_radius: 0.45          # Ban kinh robot (m) - (duong tron tam robot va diem xa nhat tren robot) (The radius of the robot in meters, this parameter should only be set for circular robots, all others should use the footprint parameter described above.)
+
+inflation_radius: 2         # Ban kinh toi da khoang cach tu vat can ma phat sinh cost. Ngoai khoang tren robot se coi tat ca cac path co cost bang nhau (the maximum distance from obstacles at which a cost should be incurred. the robot will treat all paths that stay inflation_radius (meters) or more away from obstacles as having equal obstacle cost)
+cost_scaling_factor: 3.0
+
+map_type: costmap
+# Info: Thong tin ve cam bien laser: {sensor_frame: frame_name, data_type: LaserScan, topic: topic_name, marking: true, clearing: true}
+observation_sources: scan
+# scan: {sensor_frame: base_laser, data_type: LaserScan, topic: /sick_safetyscanners/scan_multi, marking: true, clearing: true}
+scan: {sensor_frame: base_laser, data_type: LaserScan, topic: /sick_safetyscanners_front/scan, marking: true, clearing: true}

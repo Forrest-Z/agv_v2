@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="mls_diagnotics" type="diagnostic_msg" name="mls_diagnotics_forward" args = "1" output="screen">
+  </node>
+  
+  <node pkg="mls_diagnotics" type="diagnostic_msg" name="mls_diagnotics_backward" args = "2" output="screen">
+  </node>
+
+</launch>

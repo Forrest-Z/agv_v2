@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="driver_blvd_controller" type="Navigation_control" name="Echo_navigation" output="screen"></node>
+  
+  <node pkg="driver_blvd_controller" type="blvd20km_controller" name="Driver_motor_1" args="1 /dev/ttyS3 115200" output="screen">
+  </node>
+
+  <node pkg="driver_blvd_controller" type="blvd20km_controller" name="Driver_motor_2" args="2 /dev/ttyS4 115200" output="screen">
+  </node>
+ 
+<!--    <node pkg="driver_blvd_controller" type="odometry" name="odometry_publisher" output="screen"> 
+</node> --> 
+
+</launch>

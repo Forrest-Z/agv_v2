@@ -1,0 +1,23 @@
+    
+consept_mls0: 
+  present_speed_setting: 1 # percent speed %
+  L: 0.500                 # khoang cach 2 banh
+  Lm: 0.314                # Khoang cach  tu tam truc banh den tam do line 
+  R: 0.085                 # wheel radius (in meters per radian)
+  Lt: 0.34
+  v_max_wheel: 4000        # speed maximum of moter before gear
+  v_min_wheel: 80          # speed maximum of moter before gear
+  Speed: 0.09              # speed robot
+  K: 30                    # He so banh rang dong co
+
+consept_mls1: 
+  present_speed_setting: 1 # percent speed %
+  L: 0.500                 # khoang cach 2 banh
+  Lm: 0.317                # Khoang cach  tu tam truc banh den tam do line 
+  R: 0.085                 # wheel radius (in meters per radian)
+  Lt: 0.34
+  v_max_wheel: 4000        # speed maximum of moter before gear
+  v_min_wheel: 80          # speed maximum of moter before gear
+  Speed: -0.09             # speed robot
+  K: 30                    # He so banh rang dong co
+   

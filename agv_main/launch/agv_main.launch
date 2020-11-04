@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Arguments -->
+
+  <!-- agv_main -->
+  <node pkg="agv_main" type="agv_main.py" respawn="false" name="agv_main" output="screen"></node>
+
+  <!-- <node pkg="agv_main" type="agv_test_web.py" respawn="false" name="agv_test_web" output="screen"></node> -->
+
+</launch>
+
