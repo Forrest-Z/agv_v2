@@ -20,8 +20,14 @@ clock_t start;
 
 ros::Publisher control_wheel_left_pub, control_wheel_right_pub;
 void publishControlWheel (int16_t W_l, int16_t W_r);
+void cmdVelToWheel (geometry_msgs::Twist cmd_vel);
 
 void velCallback(const geometry_msgs::Twist& msg)
+{
+  cmdVelToWheel(msg);
+} //cmd_velCallback
+
+void cmdVelToWheel (geometry_msgs::Twist cmd_vel)
 {
   start = clock();
   float k_v = 1;    // percent speed %
@@ -33,7 +39,7 @@ void velCallback(const geometry_msgs::Twist& msg)
   float v_l; // counter-clockwise angular velocity of left wheel (ie radians per second)
   float w_r, w_l; // speed rad/s of one
 
-  V_max = msg.linear.x;  W = msg.angular.z;
+  V_max = cmd_vel.linear.x;  W = cmd_vel.angular.z;
   V = V_max*k_v;
 
   /* Van toc goc 2 banh */
@@ -47,6 +53,7 @@ void velCallback(const geometry_msgs::Twist& msg)
   /* van toc truoc hop so */
   W_r = v_r*K; 
   W_l = v_l*K;
+  
   /* Kiem  tra van toc */
   if(abs(W_r) > BLVD20KM_SPEED_MAX) W_r = BLVD20KM_SPEED_MAX;
   if(abs(W_l) > BLVD20KM_SPEED_MAX) W_l = BLVD20KM_SPEED_MAX;
@@ -56,10 +63,10 @@ void velCallback(const geometry_msgs::Twist& msg)
   // ROS_INFO("driver_control.cpp-67- Wheel left: %d  Wheel right: %d", W_l, W_r);
 
   publishControlWheel(W_l, W_r);
-} //cmd_velCallback
+}
 
 void publishControlWheel (int16_t W_l, int16_t W_r){
-  // ROS_INFO("driver_control.cpp-73- publishControlWheel: Wheel left: %d  Wheel right: %d", W_l, W_r);
+  ROS_INFO("driver_control.cpp-73- publishControlWheel: Wheel left: %d  Wheel right: %d", W_l, W_r);
   driver_blvd_controller::speed_wheel robot;
   robot.wheel_letf = W_l;
   robot.wheel_right = -W_r;

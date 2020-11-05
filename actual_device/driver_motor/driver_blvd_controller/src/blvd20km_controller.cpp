@@ -27,7 +27,7 @@ int ID;
 //Process ROS receive from navigation message, send to uController
 void controlWheelCallback(const driver_blvd_controller::speed_wheel& robot)
 {
-	ROS_INFO("blvd20km_controller.cpp-30-controlWheelCallback()");
+	// ROS_INFO("blvd20km_controller.cpp-30-controlWheelCallback()");
 	speed[0] = robot.wheel_letf;
   	speed[1] = robot.wheel_right;
 } //navigationCallback
@@ -45,8 +45,7 @@ int main(int argc, char **argv)
 			ROS_ERROR("blvd20km_controller.cpp-47-ucontroller index parameter invalid");
 			return 1;
 		}
-	}
-	else{
+	}else{
 		ID = DEFAULT_ID;
 	}
 
@@ -95,19 +94,18 @@ int main(int argc, char **argv)
 		sleep(1);
 		if(stat(port, &sb) == 0)
 		{
-				writeResetAlarm(ID); 
-				writeSpeedControlMode(ID,BLVD02KM_SPEED_MODE_USE_DIGITALS);
-				writeAcceleration(ID,2);
-				writeDeceleration(ID,2);
-				writeSpeed(ID,BLVD20KM_SPEED_MIN);
-				writeStop(ID);
-				clearAlarmRecords(ID); 
-				clearWarningRecords(ID);
+			writeResetAlarm(ID); 
+			writeSpeedControlMode(ID,BLVD02KM_SPEED_MODE_USE_DIGITALS);
+			writeAcceleration(ID,2);
+			writeDeceleration(ID,2);
+			writeSpeed(ID,BLVD20KM_SPEED_MIN);
+			writeStop(ID);
+			clearAlarmRecords(ID); 
+			clearWarningRecords(ID);
 		}
 		while(ros::ok())
 		{
-			if((double)(clock() -  begin)/( CLOCKS_PER_SEC/1000) >= 2)
-			{
+			if((double)(clock() -  begin)/( CLOCKS_PER_SEC/1000) >= 2){
 				check_connect = stat(port, &sb);
 				begin = clock();
 			}
@@ -138,25 +136,19 @@ int main(int argc, char **argv)
 			
 			Driver.values.clear();
 			
-			if (check_connect != 0)
-			{
+			if (check_connect != 0){
 				Driver.level = diagnostic_msgs::DiagnosticStatus::ERROR;
 				Driver.message = "Driver disconnected. Check connection,plaese!!";
-			}else if(alarm_status[ID-1] != 0)
-				{
-					Driver.level = diagnostic_msgs::DiagnosticStatus::ERROR;
-					Driver.message = "Driver is alarm. Reset device, please!!";
-				}
-			else if (warning_status[ID-1] !=0)
-				{
-					Driver.level = diagnostic_msgs::DiagnosticStatus::WARN;
-					Driver.message = " Warning from driver. Attention!!";
-				}
-			else
-				{
-					Driver.level = diagnostic_msgs::DiagnosticStatus::OK;
-					Driver.message = "Driver seem to be ok.";
-				}
+			}else if(alarm_status[ID-1] != 0){
+				Driver.level = diagnostic_msgs::DiagnosticStatus::ERROR;
+				Driver.message = "Driver is alarm. Reset device, please!!";
+			}else if (warning_status[ID-1] !=0){
+				Driver.level = diagnostic_msgs::DiagnosticStatus::WARN;
+				Driver.message = " Warning from driver. Attention!!";
+			}else{
+				Driver.level = diagnostic_msgs::DiagnosticStatus::OK;
+				Driver.message = "Driver seem to be ok.";
+			}
 
 			getSpeed.key = "Feed back speed";
 			getSpeed.value = std::to_string((int16_t)feedback_speed[ID-1]);

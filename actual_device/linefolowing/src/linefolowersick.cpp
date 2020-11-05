@@ -167,8 +167,7 @@ void mlsCallback(const linefolowing::MLS_Measurement& msg)
 			charging_action.action = action_;
 			charging_action.status = 3;
 			charger_status_pub.publish(charging_action);
-			ROS_INFO("linefolwersick.cpp-170: Publish result");	
-			// ROS_INFO("linefolwersick.cpp-168: Vung 3, stop  dir = %d", direct);	
+			ROS_INFO("linefolwersick.cpp-170: Publish result - Vung 3, stop  dir = %d", direct);	
 			for(int i = 0; i<0; i++) ROS_INFO(" ");
 		}
 		else if(msg.position[2] <= 0.00)
@@ -331,4 +330,33 @@ void Gacceleration(float& present_speed,const float step)
 void Deceleration(float& present_speed, const float step)
 {
 	present_speed -= step;
+}
+
+void wheelToCmdVel (geometry_msgs::Twist cmd_vel)
+{
+  start = clock();
+  float k_v = 1;    // percent speed %
+  float V_max ;     // speed max when percent speed = 100%  (m/s)
+  float K = 30;          // He so chuyen
+  float V;  // forward velocity (ie meters per second)
+  float W;  // angular velocity (ie radians per second)
+  float v_r; // clockwise angular velocity of right wheel (ie radians per second)
+  float v_l; // counter-clockwise angular velocity of left wheel (ie radians per second)
+  float w_r, w_l; // speed rad/s of one
+
+  V_max = cmd_vel.linear.x;  W = cmd_vel.angular.z;
+  V = V_max*k_v;
+
+  /* Van toc goc 2 banh */
+  w_r = ((2 * V) + (W * L)) / (2 * R);   //(rad/s)
+  w_l = ((2 * V) - (W * L)) / (2 * R);   //(rad/s)
+
+  /* Van toc 2 banh */
+  v_r = w_r*rad_rpm;  // (rpm)  
+  v_l = w_l*rad_rpm;  // (rpm) 
+
+  /* van toc truoc hop so */
+  W_r = v_r*K; 
+  W_l = v_l*K;
+  
 }

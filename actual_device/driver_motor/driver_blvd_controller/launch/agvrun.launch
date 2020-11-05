@@ -8,8 +8,5 @@
 
   <node pkg="driver_blvd_controller" type="blvd20km_controller" name="Driver_motor_left" args="1 /dev/ttyS3 115200" output="screen" ns="left_wheel"></node>
   <node pkg="driver_blvd_controller" type="blvd20km_controller" name="Driver_motor_right" args="2 /dev/ttyS4 115200" output="screen" ns="right_wheel"></node>
- 
-<!--    <node pkg="driver_blvd_controller" type="odometry" name="odometry_publisher" output="screen"> 
-</node> --> 
 
 </launch>
