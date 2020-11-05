@@ -121,14 +121,10 @@ int main(int argc, char **argv)
 				break;
 			} 
 
-			if(speed[ID-1] > 0)
-			{
+			if(speed[ID-1] > 0){
 				writeForward(ID);
-
-			}else if(speed[ID-1] < 0)
-			{
+			}else if(speed[ID-1] < 0){
 				writeReverse(ID);
-
 			}else writeStop(ID);
 
 			writeSpeed(ID, abs(speed[ID-1]));
@@ -136,9 +132,13 @@ int main(int argc, char **argv)
 			readAlarm(ID, &alarm_status[ID-1]);
 			readWarning(ID, &warning_status[ID-1]);
 
-			if(ID = 1) encoder_wheel.wheel_letf =  feedback_speed[0]; 
-				else encoder_wheel.wheel_right =  feedback_speed[1]; 
-			encoder_pub.publish(encoder_wheel);
+			// if(ID = 1) {
+			// 	encoder_wheel.wheel_letf =  feedback_speed[0]; 
+			// 	ROS_INFO("blvd20km_controller.cpp-137-encoder_wheel_left: %f", encoder_wheel.wheel_letf);
+			// 	encoder_wheel.wheel_right =  feedback_speed[1]; 
+			// 	ROS_INFO("blvd20km_controller.cpp-140-encoder_wheel_right: %f", encoder_wheel.wheel_right);
+			// 	encoder_pub.publish(encoder_wheel);
+			// }
 			
 			Driver.values.clear();
 			
