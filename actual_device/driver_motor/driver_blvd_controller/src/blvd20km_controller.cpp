@@ -24,12 +24,10 @@ struct stat sb;
 clock_t begin;
 int ID;
 
-ros::Subscriber navigation;
-
-
 //Process ROS receive from navigation message, send to uController
-void speedWheelCallback(const driver_blvd_controller::speed_wheel& robot)
+void controlWheelCallback(const driver_blvd_controller::speed_wheel& robot)
 {
+	ROS_INFO("blvd20km_controller.cpp-30-controlWheelCallback()");
 	speed[0] = robot.wheel_letf;
   	speed[1] = robot.wheel_right;
 } //navigationCallback
@@ -39,13 +37,11 @@ int main(int argc, char **argv)
 	char port[30];    //port name
 	int baud;     	  //baud rate 
 	//char topicPublish[30]; // topic name
-	
 
 	if (argc > 1) {
 		if(sscanf(argv[1],"%d", &ID)==1) {
 			ROS_INFO("blvd20km_controller.cpp-44-ID = %d", ID);
-		}
-	else{
+		}else{
 			ROS_ERROR("blvd20km_controller.cpp-47-ucontroller index parameter invalid");
 			return 1;
 		}
@@ -67,13 +63,12 @@ int main(int argc, char **argv)
 	}
 
 	/*create ros node*/
-	ros::init(argc, argv, "Driver_motor");
+	ros::init(argc, argv, "driver_motor");
 	ros::NodeHandlePtr nh = boost::make_shared<ros::NodeHandle>();
 	/* Subscriber */
-	ros::Subscriber cmd_vel_to_wheel =  nh->subscribe("cmd_vel_to_wheel", 20,speedWheelCallback); 
+	ros::Subscriber cmd_vel_to_wheel = nh->subscribe("control_wheel", 20, controlWheelCallback); 
 	/* Publisher */
 	ros::Publisher diagnostic_pub = nh->advertise<diagnostic_msgs::DiagnosticArray>("diagnostics", 20);
-
 	ros::Publisher encoder_pub = nh->advertise<driver_blvd_controller::speed_wheel>("encoder_wheel", 20);
     
 	diagnostic_msgs::DiagnosticArray dir_array;
@@ -82,6 +77,7 @@ int main(int argc, char **argv)
 	diagnostic_msgs::KeyValue alarmRecord;
 	diagnostic_msgs::KeyValue warningRecord;
 	std_msgs::Header timer;
+
 	ros::Time a_little_after_the_beginning(0, 1000000);
 	timer.frame_id = "driverID";
 

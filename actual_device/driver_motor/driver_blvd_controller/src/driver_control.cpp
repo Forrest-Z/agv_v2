@@ -2,11 +2,9 @@
 #include "std_msgs/String.h"
 #include <geometry_msgs/Twist.h>
 #include "driver_blvd_controller/speed_wheel.h"
-#include "agv_msgs/agv_action.h"
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <unistd.h>
 
 #define BLVD20KM_SPEED_MIN 80
@@ -19,16 +17,11 @@
 #define R  0.075 //wheel radius (in meters per radian)
 int16_t W_l, W_r; // speed befor gear 
 clock_t start;
-const unsigned long timeoutMs = 1; //sec
-uint8_t action_ ;
 
-void actionCallback(const agv_msgs::agv_action& msg)
-{
-	ROS_INFO("Navigation_control.cpp-26-actionCallback()-action: %d", msg.action);
-  action_ = msg.action;
-}//teleop_keyCallback 
+ros::Publisher control_wheel_left_pub, control_wheel_right_pub;
+void publishControlWheel (int16_t W_l, int16_t W_r);
 
-void cmd_velCallback(const geometry_msgs::Twist& msg)
+void velCallback(const geometry_msgs::Twist& msg)
 {
   start = clock();
   float k_v = 1;    // percent speed %
@@ -60,45 +53,34 @@ void cmd_velCallback(const geometry_msgs::Twist& msg)
 
   if(abs(W_r) < BLVD20KM_SPEED_MIN) W_r = 0;
   if(abs(W_l) < BLVD20KM_SPEED_MIN) W_l = 0;
-  ROS_INFO("Navigation_control.cpp-83- Wheel left: %d  Wheel right: %d", W_l, W_r);
+  // ROS_INFO("driver_control.cpp-67- Wheel left: %d  Wheel right: %d", W_l, W_r);
+
+  publishControlWheel(W_l, W_r);
 } //cmd_velCallback
+
+void publishControlWheel (int16_t W_l, int16_t W_r){
+  // ROS_INFO("driver_control.cpp-73- publishControlWheel: Wheel left: %d  Wheel right: %d", W_l, W_r);
+  driver_blvd_controller::speed_wheel robot;
+  robot.wheel_letf = W_l;
+  robot.wheel_right = -W_r;
+  control_wheel_left_pub.publish(robot);
+  control_wheel_right_pub.publish(robot);
+}
 
 int main(int argc, char **argv)
 {
-  /**
-   Khoi tao Node 
-   */
-  driver_blvd_controller::speed_wheel robot;
-  ros::init(argc, argv, "Echo_navigation");
-  ros::NodeHandle nh;
-  ros::Rate loop_rate(20);
+  ros::init(argc, argv, "driver_control");
 
   /* Publisher */
-  ros::Publisher Navigation_control;
-  Navigation_control = nh.advertise<driver_blvd_controller::speed_wheel>("cmd_vel_to_wheel", 20);
+  ros::NodeHandle nh;
+  control_wheel_left_pub = nh.advertise<driver_blvd_controller::speed_wheel>("left_wheel/control_wheel", 20);
+  control_wheel_right_pub = nh.advertise<driver_blvd_controller::speed_wheel>("right_wheel/control_wheel", 20);
 
   /* Subscriber */
   ros::Subscriber cmd_vel;
-  cmd_vel = nh.subscribe("cmd_vel", 20,cmd_velCallback);
-  ros::Subscriber action = nh.subscribe("agv_action", 20,actionCallback);
-  uint64_t time_count;
-  while (ros::ok())
-  {
-  /*
-  * This is a message object. You stuff it with data, and then publish it.
-  */
-  if(action_ != 6 && action_ != 8)  // if not Charging in and Lift in
-  {
-    robot.wheel_letf = W_l;
-    robot.wheel_right = -W_r;
-    Navigation_control.publish(robot);
-    // ROS_INFO("Navigation_control.cpp-95- Publish to driver - Wheel left: %d  Wheel right: %d", robot.wheel_letf, robot.wheel_right);
-  }
-    // if((clock() - start)/CLOCKS_PER_SEC >= timeoutMs) 
-    //     W_r = W_l= 0;
-    loop_rate.sleep();
-    ros::spinOnce();
-  }
+  cmd_vel = nh.subscribe("cmd_vel", 20, velCallback);
+
+  ros::spin();
    
   return 0;
 }

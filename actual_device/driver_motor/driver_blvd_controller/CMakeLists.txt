@@ -15,14 +15,13 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-    FILES
-    speed_wheel.msg
-    MLS_Measurement.msg
+  FILES
+  speed_wheel.msg
 )
 
 generate_messages(
-   DEPENDENCIES
-   std_msgs
+  DEPENDENCIES
+  std_msgs
 )
 
 catkin_package(
@@ -41,14 +40,9 @@ add_dependencies(blvd20km_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 target_link_libraries(blvd20km_controller ${catkin_LIBRARIES})
 
 #Navigation_cotrol
-add_executable(Navigation_control src/Navigation_control.cpp)
-add_dependencies(Navigation_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(Navigation_control ${catkin_LIBRARIES})
-
-#odometry
-add_executable(odometry src/odometry.cpp)
-add_dependencies(odometry ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(odometry ${catkin_LIBRARIES})
+add_executable(driver_control src/driver_control.cpp)
+add_dependencies(driver_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(driver_control ${catkin_LIBRARIES})
 
 include_directories(
   include

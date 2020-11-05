@@ -465,7 +465,7 @@ ssize_t writeQuery(uint8_t address,uint8_t fnCode, uint8_t data[], uint16_t data
   	return write(fd,msg,(size_t)queryLen);
 }
 
-/*##############################################################3##################*/
+/*################################################################################*/
 uint8_t readRegisters(uint8_t address, uint16_t readStartAddress, uint16_t dataLen, uint16_t registerData[]) 
 {
 	uint8_t result;
