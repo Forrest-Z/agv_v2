@@ -15,6 +15,7 @@
 #define DEFAULT_SERIALPORT "/dev/AGV-BLDV20KM"
 #define DEFAULT_ID 1
 
+
 /* Globle value */
 int speed[2];
 uint16_t alarm_status[2], feedback_speed[2], warning_status[2];
@@ -134,11 +135,10 @@ int main(int argc, char **argv)
 
 			// if(ID = 1) {
 			// 	encoder_wheel.wheel_letf =  feedback_speed[0]; 
-			// 	ROS_INFO("blvd20km_controller.cpp-137-encoder_wheel_left: %f", encoder_wheel.wheel_letf);
+			// }else{
 			// 	encoder_wheel.wheel_right =  feedback_speed[1]; 
-			// 	ROS_INFO("blvd20km_controller.cpp-140-encoder_wheel_right: %f", encoder_wheel.wheel_right);
-			// 	encoder_pub.publish(encoder_wheel);
 			// }
+			//encoder_pub.publish(encoder_wheel);
 			
 			Driver.values.clear();
 			

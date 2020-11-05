@@ -2,25 +2,25 @@ DWAPlannerROS:
 
 # Robot Configuration Parameters (m/s)
   max_vel_x: 1  # (double, default: 0.55 m/s) The maximum x velocity for the robot in m/s
-  min_vel_x: 0.3 #  (double, default: 0.0 m/s) The minimum x velocity for the robot in m/s 
+  min_vel_x: 0.5 #  (double, default: 0.0 m/s) The minimum x velocity for the robot in m/s 
 
   max_vel_y: 0.0  # (double, default: 0.1 m/s) The maximum y velocity for the robot in m/s 
   min_vel_y: 0.0  # (double, default: -0.1 m/s) The minimum y velocity for the robot in m/s 
 
 # The velocity when robot is moving in a straight line (m/s)
   max_vel_trans:  1  # (double, default: 0.55 m/s) The absolute value of the maximum translational velocity for the robot in m/s 
-  min_vel_trans:  0.2  # (double, default: 0.1 m/s) The absolute value of the minimum translational velocity for the robot in m/s 
+  min_vel_trans:  0.05  # (double, default: 0.1 m/s) The absolute value of the minimum translational velocity for the robot in m/s 
 
-  max_vel_theta: 0.8  # (double, default: 1.0 rad/s) The absolute value of the maximum rotational velocity for the robot in rad/s 
-  min_vel_theta: 0.45  #  (double, default: 0.4 rad/s) The absolute value of the minimum rotational velocity for the robot in rad/s 
+  max_vel_theta: 1  # (double, default: 1.0 rad/s) The absolute value of the maximum rotational velocity for the robot in rad/s 
+  min_vel_theta: 0.6  #  (double, default: 0.4 rad/s) The absolute value of the minimum rotational velocity for the robot in rad/s 
 
   acc_lim_x: 2  #  (double, default: 2.5 m/s2) The x acceleration limit of the robot in meters/sec^2 
   acc_lim_y: 0.0  #  (double, default: 2.5 m/s2) .The y acceleration limit of the robot in meters/sec^2 
   acc_lim_theta: 3.2  # (double, default: 3.2 rad/s2) .The rotational acceleration limit of the robot in radians/sec^2 
 
 # Goal Tolerance Parametes (m)
-  xy_goal_tolerance: 0.2  # (double, default: 0.1 m) Sai so vi tri cho phep tai vi tri dich (The tolerance in meters for the controller in the x & y distance when achieving a goal)
-  yaw_goal_tolerance: 0.1      # (double, default: 0.05 rad) Sai so goc cho phep tai vi tri dich (The tolerance in radians for the controller in yaw/rotation when achieving its goal)
+  xy_goal_tolerance: 0.1  # (double, default: 0.1 m) Sai so vi tri cho phep tai vi tri dich (The tolerance in meters for the controller in the x & y distance when achieving a goal)
+  yaw_goal_tolerance: 0.05      # (double, default: 0.05 rad) Sai so goc cho phep tai vi tri dich (The tolerance in radians for the controller in yaw/rotation when achieving its goal)
   latch_xy_goal_tolerance: true # (bool, default: false) Neu vi tri robot ngoai sai so dich (xy), cho phep robot quay tai cho? (If goal tolerance is latched, if the robot ever reaches the goal xy location it will simply rotate in place, even if it ends up outside the goal tolerance while it is doing so)
 
 # Forward Simulation Parameters
