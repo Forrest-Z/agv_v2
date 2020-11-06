@@ -121,7 +121,7 @@ def liftFunction(msg):
 
 
 def moveResult(msg):
-    rospy.loginfo("agv_main.py-moveResult()")
+    rospy.loginfo("agv_main.py-moveResult(): " + str(msg.status.status))
     status_ = msg.status.status
     pubActionStatus(msg, status_)
 

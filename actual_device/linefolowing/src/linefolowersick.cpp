@@ -216,16 +216,16 @@ geometry_msgs::Twist wheelToCmdVel (int32_t speed_left, int32_t speed_right)
 {
 	geometry_msgs::Twist cmd_vel;
 
-	ROS_INFO("linefolowersick.cpp-216- Ti so truyen: K = %d", K);
-	ROS_INFO("linefolowersick.cpp-217- Ban kinh banh xe: R = %f", R);
-	ROS_INFO("linefolowersick.cpp-218- Khoang cach giua 2 banh xe: L = %f", L);
-	ROS_INFO("linefolowersick.cpp-219- rad_rpm = %f", rad_rpm);
+	// ROS_INFO("linefolowersick.cpp-216- Ti so truyen: K = %d", K);
+	// ROS_INFO("linefolowersick.cpp-217- Ban kinh banh xe: R = %f", R);
+	// ROS_INFO("linefolowersick.cpp-218- Khoang cach giua 2 banh xe: L = %f", L);
+	// ROS_INFO("linefolowersick.cpp-219- rad_rpm = %f", rad_rpm);
 
-	float linear  = (R * (abs(speed_right) + abs(speed_left)))/(2 * K * rad_rpm);
-	float angular = (R * (abs(speed_right) - abs(speed_left)))/(L * K * rad_rpm);
+	float linear  = (R * (abs(speed_left) + abs(speed_right)))/(2 * K * rad_rpm);
+	float angular = (R * (abs(speed_left) - abs(speed_right)))/(L * K * rad_rpm);
 	if(direct == -1){
 		cmd_vel.linear.x  = -linear;
-		cmd_vel.angular.z = -angular;
+		cmd_vel.angular.z = angular;
 	}
 	ROS_INFO("linefolowersick.cpp-317-linear = %f, angular = %f", cmd_vel.linear.x, cmd_vel.angular.z);
   
