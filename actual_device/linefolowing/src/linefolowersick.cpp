@@ -49,31 +49,39 @@ struct mlse
 /* Include funtion for Sick line */
 void Gacceleration(float& present_speed, const float step);
 void Deceleration(float& present_speed, const float step);
+geometry_msgs::Twist wheelToCmdVel (int32_t speed_left, int32_t speed_right);
 
 /* CallBack Subcriber */
 #define Pi 3.1415926535
 #define rad_rpm 9.5492965964254
+#define L 0.5 // wheelbase (in meters per radian)
+#define R 0.085 //wheel radius (in meters per radian)
+#define K 30    //Ti so truyen cua hop so dong co
 
 //Global data
 float present_speed;  		 			// percent speed %
 float present_speed_setting; 	// percent speed setting
 float speed_setting; 					 // speed max when percent speed = 100%  (m/s)
-float L; 											   // khoang cach 2 banh
+// float L; 											   // khoang cach 2 banh
 float Lm; 											// Khoang cach  tu tam truc banh den tam do line 
-float R; 											  // wheel radius (in meters per radian)
+// float R; 											  // wheel radius (in meters per radian)
 float v_max_wheel; 						// speed maximum of moter behind gear
 float v_min_wheel; 						 // speed maximum of moter behind gear
 float Lt;									 		 // Dường kính vòng cua
 float V;  						  					 // forward velocity (ie meters per second)
-float K;  											 // He so chuyen banh răng
+// float K;  											 // He so chuyen banh răng
 int W_l, W_r; 				   	     		   // speed befor gear
 int8_t direct ;
+
+geometry_msgs::Twist cmd_vel;
 
 ros::Publisher speedwheel;
 linefolowing::speed_wheel robot;
 
 uint8_t action_ = 0;
 ros::Publisher charger_status_pub;
+
+ros::Publisher cmd_vel_pub;
 
 void chargerActionCallback(const agv_msgs::agv_action& msg)
 {
@@ -161,7 +169,9 @@ void mlsCallback(const linefolowing::MLS_Measurement& msg)
 
 			robot.wheel_letf = 0;
 			robot.wheel_right = 0;
-			speedwheel.publish(robot);
+			// speedwheel.publish(robot);
+			cmd_vel = wheelToCmdVel(robot.wheel_letf, robot.wheel_right);
+			cmd_vel_pub.publish(cmd_vel);
 
 			agv_msgs::agv_action charging_action;
 			charging_action.action = action_;
@@ -201,6 +211,26 @@ void mlsCallback(const linefolowing::MLS_Measurement& msg)
 	if(W_r < v_min_wheel) W_r = 0;
 	
 } //echo_line_previousCallback
+
+geometry_msgs::Twist wheelToCmdVel (int32_t speed_left, int32_t speed_right)
+{
+	geometry_msgs::Twist cmd_vel;
+
+	ROS_INFO("linefolowersick.cpp-216- Ti so truyen: K = %d", K);
+	ROS_INFO("linefolowersick.cpp-217- Ban kinh banh xe: R = %f", R);
+	ROS_INFO("linefolowersick.cpp-218- Khoang cach giua 2 banh xe: L = %f", L);
+	ROS_INFO("linefolowersick.cpp-219- rad_rpm = %f", rad_rpm);
+
+	float linear  = (R * (abs(speed_right) + abs(speed_left)))/(2 * K * rad_rpm);
+	float angular = (R * (abs(speed_right) - abs(speed_left)))/(L * K * rad_rpm);
+	if(direct == -1){
+		cmd_vel.linear.x  = -linear;
+		cmd_vel.angular.z = -angular;
+	}
+	ROS_INFO("linefolowersick.cpp-317-linear = %f, angular = %f", cmd_vel.linear.x, cmd_vel.angular.z);
+  
+  	return cmd_vel;
+}
 
 /* MAIN */
 int main(int argc, char **argv)
@@ -246,14 +276,14 @@ int main(int argc, char **argv)
   	sprintf(param,"/consept_mls%d/present_speed_setting",ucIndex);
   	n.getParam(param,present_speed_setting);
 
-  	sprintf(param,"/consept_mls%d/L",ucIndex);
-  	n.getParam(param,L);
+  	// sprintf(param,"/consept_mls%d/L",ucIndex);
+  	// n.getParam(param,L);
 
   	sprintf(param,"/consept_mls%d/Lm",ucIndex);
   	n.getParam(param,Lm);
 
-	sprintf(param,"/consept_mls%d/R",ucIndex);
-  	n.getParam(param,R);
+	// sprintf(param,"/consept_mls%d/R",ucIndex);
+  	// n.getParam(param,R);
 
   	sprintf(param,"/consept_mls%d/Lt",ucIndex);
   	n.getParam(param,Lt);
@@ -267,13 +297,14 @@ int main(int argc, char **argv)
 	sprintf(param,"/consept_mls%d/Speed",ucIndex);
     n.getParam(param,speed_setting);
 
-	sprintf(param,"/consept_mls%d/K",ucIndex);
-  	n.getParam(param,K);
+	// sprintf(param,"/consept_mls%d/K",ucIndex);
+  	// n.getParam(param,K);
 
  	ROS_INFO("linefolowersick.cpp-274-MLS line sick %d starting",ucIndex);	
 
 	/* Publisher */
 	speedwheel = n.advertise<linefolowing::speed_wheel>("cmd_vel_to_wheel", 20);
+	cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 20);
 	 
 	/* Subscriber position line */
 	ros::Subscriber action = n.subscribe("/charging_action", 20,chargerActionCallback);	 	
@@ -286,38 +317,40 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
-			/* This is a message object. You stuff it with data, and then publish it. */
-			//if(int8_t(speed_setting/abs(speed_setting)) == dir && direct != 0 && direct == dir )
-			if(int8_t(speed_setting/abs(speed_setting)) ==  direct)
+		/* This is a message object. You stuff it with data, and then publish it. */
+		//if(int8_t(speed_setting/abs(speed_setting)) == dir && direct != 0 && direct == dir )
+		if(int8_t(speed_setting/abs(speed_setting)) ==  direct)
+		{
+			if(float(clock()-begin_time)/CLOCKS_PER_SEC*1000  >= 1)		 // 1 ms
 			{
-				if(float(clock()-begin_time)/CLOCKS_PER_SEC*1000  >= 1)		 // 1 ms
+				if(present_speed != present_speed_setting)
 				{
-					if(present_speed != present_speed_setting)
-					{
-						if(present_speed_setting > present_speed) {
-							Gacceleration(present_speed, 0.02);
-						}else if(present_speed_setting < present_speed) {
-							Deceleration(present_speed, 0.02);
-						}
-					} 
-					begin_time = clock();
-				}
-				if(status.line_good == true)
-				{
-					robot.wheel_letf  = W_l*direct;
-					robot.wheel_right = W_r*direct*(-1);
-					if(status.track_level <= 3 && status.track_level > 0) ROS_WARN("linefolowersick.cpp-310-From MLS%d: track too weak!!",ucIndex);
-				}else 
-					{
-						ROS_ERROR("linefolowersick.cpp-313-From MLS%d: no track!!", ucIndex);
-						robot.wheel_letf = 0;
-						robot.wheel_right = 0;
+					if(present_speed_setting > present_speed) {
+						Gacceleration(present_speed, 0.02);
+					}else if(present_speed_setting < present_speed) {
+						Deceleration(present_speed, 0.02);
 					}
-				ROS_INFO("linefolowersick.cpp-317-Banh trai = %d Banh phai = %d",robot.wheel_letf, robot.wheel_right);
-				speedwheel.publish(robot);
+				} 
+				begin_time = clock();
 			}
-			loop_rate.sleep();
-			ros::spinOnce();
+			if(status.line_good == true){
+				robot.wheel_letf  = W_l*direct;
+				robot.wheel_right = W_r*direct*(-1);
+				if(status.track_level <= 3 && status.track_level > 0) {
+					ROS_WARN("linefolowersick.cpp-310-From MLS%d: track too weak!!",ucIndex);
+				}
+			}else {
+				ROS_ERROR("linefolowersick.cpp-313-From MLS%d: no track!!", ucIndex);
+				robot.wheel_letf = 0;
+				robot.wheel_right = 0;
+			}
+			ROS_INFO("linefolowersick.cpp-317- Banh trai = %d Banh phai = %d", robot.wheel_letf, robot.wheel_right);
+			// speedwheel.publish(robot);
+			cmd_vel = wheelToCmdVel(robot.wheel_letf, robot.wheel_right);
+			cmd_vel_pub.publish(cmd_vel);
+		}
+		loop_rate.sleep();
+		ros::spinOnce();
 	}	
 	return 0;
 }
@@ -332,31 +365,3 @@ void Deceleration(float& present_speed, const float step)
 	present_speed -= step;
 }
 
-void wheelToCmdVel (geometry_msgs::Twist cmd_vel)
-{
-  start = clock();
-  float k_v = 1;    // percent speed %
-  float V_max ;     // speed max when percent speed = 100%  (m/s)
-  float K = 30;          // He so chuyen
-  float V;  // forward velocity (ie meters per second)
-  float W;  // angular velocity (ie radians per second)
-  float v_r; // clockwise angular velocity of right wheel (ie radians per second)
-  float v_l; // counter-clockwise angular velocity of left wheel (ie radians per second)
-  float w_r, w_l; // speed rad/s of one
-
-  V_max = cmd_vel.linear.x;  W = cmd_vel.angular.z;
-  V = V_max*k_v;
-
-  /* Van toc goc 2 banh */
-  w_r = ((2 * V) + (W * L)) / (2 * R);   //(rad/s)
-  w_l = ((2 * V) - (W * L)) / (2 * R);   //(rad/s)
-
-  /* Van toc 2 banh */
-  v_r = w_r*rad_rpm;  // (rpm)  
-  v_l = w_l*rad_rpm;  // (rpm) 
-
-  /* van toc truoc hop so */
-  W_r = v_r*K; 
-  W_l = v_l*K;
-  
-}

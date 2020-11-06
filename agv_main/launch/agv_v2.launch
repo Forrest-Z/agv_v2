@@ -8,8 +8,8 @@
   <arg name="host_ip"             default="192.168.1.255"/>
   <arg name="host_udp_port_front" default="6060" />
   <arg name="host_udp_port_back"  default="6061" />  
-  <!-- <arg name="angle_start_front"   default="-2" /> -->
-  <arg name="angle_start_front"   default="-0.1" /> 
+  <arg name="angle_start_front"   default="-2" />
+  <!-- <arg name="angle_start_front"   default="-0.1" />  -->
   <arg name="angle_end_front"     default="2" />
   <arg name="angle_start_back"    default="-2" />
   <arg name="angle_end_back"      default="2" />

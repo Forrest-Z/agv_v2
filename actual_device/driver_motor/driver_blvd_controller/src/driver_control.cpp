@@ -13,8 +13,10 @@
 
 #define Pi 3.1415926535
 #define rad_rpm 9.5492965964254
-#define L  0.255 // wheelbase (in meters per radian)
-#define R  0.075 //wheel radius (in meters per radian)
+// #define L  0.255 // wheelbase (in meters per radian)
+// #define R  0.075 //wheel radius (in meters per radian)
+#define L  0.5 // wheelbase (in meters per radian)
+#define R  0.085 //wheel radius (in meters per radian)
 int16_t W_l, W_r; // speed befor gear 
 clock_t start;
 
@@ -24,6 +26,7 @@ void cmdVelToWheel (geometry_msgs::Twist cmd_vel);
 
 void velCallback(const geometry_msgs::Twist& msg)
 {
+  ROS_INFO("driver_control.cpp-29- velCallback()");
   cmdVelToWheel(msg);
 } //cmd_velCallback
 
@@ -40,6 +43,7 @@ void cmdVelToWheel (geometry_msgs::Twist cmd_vel)
   float w_r, w_l; // speed rad/s of one
 
   V_max = cmd_vel.linear.x;  W = cmd_vel.angular.z;
+	ROS_INFO("driver_control.cpp-46-linear = %f, angular = %f", cmd_vel.linear.x, cmd_vel.angular.z);
   V = V_max*k_v;
 
   /* Van toc goc 2 banh */
