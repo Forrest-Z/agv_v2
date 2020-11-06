@@ -1,0 +1,5 @@
+
+L: 0.15                  # (float, default: 0.5 m) khoang cach 2 banh
+R: 0.075                 # (float, default: 0.085 m) wheel radius (in meters per radian)
+K: 30                    # (float, default: 30) He so banh rang dong co (ti so truyen)
+test: "TungNV"

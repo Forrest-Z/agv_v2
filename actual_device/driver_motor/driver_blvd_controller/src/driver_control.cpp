@@ -7,18 +7,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define BLVD20KM_SPEED_MIN 80
-#define BLVD20KM_SPEED_MAX 4000
-#define BLVD20KM_TORQUE_MAX 200
-
 #define Pi 3.1415926535
-#define rad_rpm 9.5492965964254
-// #define L  0.255 // wheelbase (in meters per radian)
-// #define R  0.075 //wheel radius (in meters per radian)
-#define L  0.5 // wheelbase (in meters per radian)
-#define R  0.085 //wheel radius (in meters per radian)
+#define rad_rpm 9.5492965964254  //convert rpm to rad/minues
+
 int16_t W_l, W_r; // speed befor gear 
 clock_t start;
+
+float L, R, K;
+float BLVD20KM_SPEED_MIN, BLVD20KM_SPEED_MAX, BLVD20KM_TORQUE_MAX;
 
 ros::Publisher control_wheel_left_pub, control_wheel_right_pub;
 void publishControlWheel (int16_t W_l, int16_t W_r);
@@ -35,12 +31,18 @@ void cmdVelToWheel (geometry_msgs::Twist cmd_vel)
   start = clock();
   float k_v = 1;    // percent speed %
   float V_max ;     // speed max when percent speed = 100%  (m/s)
-  float K = 30;          // He so chuyen
   float V;  // forward velocity (ie meters per second)
   float W;  // angular velocity (ie radians per second)
   float v_r; // clockwise angular velocity of right wheel (ie radians per second)
   float v_l; // counter-clockwise angular velocity of left wheel (ie radians per second)
   float w_r, w_l; // speed rad/s of one
+
+  ROS_ERROR("driver_control.cpp-85- L: %f", L);
+  ROS_ERROR("driver_control.cpp-85- R: %f", R);
+  ROS_ERROR("driver_control.cpp-85- K: %f", K);
+  ROS_ERROR("driver_control.cpp-85- BLVD20KM_SPEED_MIN: %f", BLVD20KM_SPEED_MIN);
+  ROS_ERROR("driver_control.cpp-85- BLVD20KM_SPEED_MAX: %f", BLVD20KM_SPEED_MAX);
+  ROS_ERROR("driver_control.cpp-85- BLVD20KM_TORQUE_MAX: %f", BLVD20KM_TORQUE_MAX);
 
   V_max = cmd_vel.linear.x;  W = cmd_vel.angular.z;
 	ROS_INFO("driver_control.cpp-46-linear = %f, angular = %f", cmd_vel.linear.x, cmd_vel.angular.z);
@@ -81,9 +83,37 @@ void publishControlWheel (int16_t W_l, int16_t W_r){
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "driver_control");
+  ros::NodeHandle nh;
+  
+  float l, r, k; 
+  std::string test;
+  ros::param::get("L", l);
+  ROS_ERROR("driver_control.cpp-89- L: %f", l);
+  nh.getParam("R", r);
+  ROS_ERROR("driver_control.cpp-91- R: %f", r);
+  nh.getParam("K", k);
+  ROS_ERROR("driver_control.cpp-85- K: %f", k);
+  // nh.getParam("test", test);
+  // ROS_ERROR("driver_control.cpp-85- test: %s", test.c_str());
+
+  if (nh.getParam("test", test))
+  {
+    ROS_INFO("Got param: %s", test.c_str());
+  }
+  else
+  {
+    ROS_ERROR("Failed to get param 'test'");
+  }
+
+  // nh.getParam("BLVD20KM_SPEED_MIN", BLVD20KM_SPEED_MIN);
+  // nh.getParam("BLVD20KM_SPEED_MAX", BLVD20KM_SPEED_MAX);
+  // nh.getParam("BLVD20KM_TORQUE_MAX", BLVD20KM_TORQUE_MAX);
+
+  // ROS_ERROR("driver_control.cpp-85- BLVD20KM_SPEED_MIN: %f", BLVD20KM_SPEED_MIN);
+  // ROS_ERROR("driver_control.cpp-85- BLVD20KM_SPEED_MAX: %f", BLVD20KM_SPEED_MAX);
+  // ROS_ERROR("driver_control.cpp-85- BLVD20KM_TORQUE_MAX: %f", BLVD20KM_TORQUE_MAX);
 
   /* Publisher */
-  ros::NodeHandle nh;
   control_wheel_left_pub = nh.advertise<driver_blvd_controller::speed_wheel>("left_wheel/control_wheel", 20);
   control_wheel_right_pub = nh.advertise<driver_blvd_controller::speed_wheel>("right_wheel/control_wheel", 20);
 

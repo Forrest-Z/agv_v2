@@ -49,7 +49,7 @@ struct mlse
 /* Include funtion for Sick line */
 void Gacceleration(float& present_speed, const float step);
 void Deceleration(float& present_speed, const float step);
-geometry_msgs::Twist wheelToCmdVel (int32_t speed_left, int32_t speed_right);
+geometry_msgs::Twist wheelToCmdVel (int8_t dir, int32_t speed_left, int32_t speed_right);
 
 /* CallBack Subcriber */
 #define Pi 3.1415926535
@@ -63,13 +63,13 @@ float present_speed;  		 			// percent speed %
 float present_speed_setting; 	// percent speed setting
 float speed_setting; 					 // speed max when percent speed = 100%  (m/s)
 // float L; 											   // khoang cach 2 banh
-float Lm; 											// Khoang cach  tu tam truc banh den tam do line 
 // float R; 											  // wheel radius (in meters per radian)
+// float K;  											 // He so chuyen banh răng
+float Lm; 											// Khoang cach  tu tam truc banh den tam do line 
 float v_max_wheel; 						// speed maximum of moter behind gear
 float v_min_wheel; 						 // speed maximum of moter behind gear
 float Lt;									 		 // Dường kính vòng cua
 float V;  						  					 // forward velocity (ie meters per second)
-// float K;  											 // He so chuyen banh răng
 int W_l, W_r; 				   	     		   // speed befor gear
 int8_t direct ;
 
@@ -170,7 +170,7 @@ void mlsCallback(const linefolowing::MLS_Measurement& msg)
 			robot.wheel_letf = 0;
 			robot.wheel_right = 0;
 			// speedwheel.publish(robot);
-			cmd_vel = wheelToCmdVel(robot.wheel_letf, robot.wheel_right);
+			cmd_vel = wheelToCmdVel(direct, robot.wheel_letf, robot.wheel_right);
 			cmd_vel_pub.publish(cmd_vel);
 
 			agv_msgs::agv_action charging_action;
@@ -212,7 +212,7 @@ void mlsCallback(const linefolowing::MLS_Measurement& msg)
 	
 } //echo_line_previousCallback
 
-geometry_msgs::Twist wheelToCmdVel (int32_t speed_left, int32_t speed_right)
+geometry_msgs::Twist wheelToCmdVel (int8_t dir, int32_t speed_left, int32_t speed_right)
 {
 	geometry_msgs::Twist cmd_vel;
 
@@ -223,7 +223,7 @@ geometry_msgs::Twist wheelToCmdVel (int32_t speed_left, int32_t speed_right)
 
 	float linear  = (R * (abs(speed_left) + abs(speed_right)))/(2 * K * rad_rpm);
 	float angular = (R * (abs(speed_left) - abs(speed_right)))/(L * K * rad_rpm);
-	if(direct == -1){
+	if(dir == -1){
 		cmd_vel.linear.x  = -linear;
 		cmd_vel.angular.z = angular;
 	}
@@ -247,12 +247,6 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;	
 	ros::Rate loop_rate(20);
 	linefolowing::speed_wheel robot;
-
-	// system("rosservice call /SickLocSetPose {\"posex: 2000, posey: 1000, yaw: 30000, uncertainty: 1000\"}");
- 	// ROS_INFO("linefolowersick.cpp-222-sudo ip link set can0 type can");	
-	// system("sudo ip link set can0 type can");
- 	// ROS_INFO("linefolowersick.cpp-225-sudo ip link set can0 up type can bitrate 125000");	
-	// system("sudo ip link set can0 up type can bitrate 125000");
 
 	//Open and initialize the serial port to the uController
   	if (argc > 1) 
@@ -346,7 +340,7 @@ int main(int argc, char **argv)
 			}
 			ROS_INFO("linefolowersick.cpp-317- Banh trai = %d Banh phai = %d", robot.wheel_letf, robot.wheel_right);
 			// speedwheel.publish(robot);
-			cmd_vel = wheelToCmdVel(robot.wheel_letf, robot.wheel_right);
+			cmd_vel = wheelToCmdVel(direct, robot.wheel_letf, robot.wheel_right);
 			cmd_vel_pub.publish(cmd_vel);
 		}
 		loop_rate.sleep();

@@ -15,7 +15,6 @@
 #define DEFAULT_SERIALPORT "/dev/AGV-BLDV20KM"
 #define DEFAULT_ID 1
 
-
 /* Globle value */
 int speed[2];
 uint16_t alarm_status[2], feedback_speed[2], warning_status[2];
