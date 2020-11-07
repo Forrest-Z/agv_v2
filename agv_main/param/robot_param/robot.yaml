@@ -1,5 +1,8 @@
 
-L: 0.15                  # (float, default: 0.5 m) khoang cach 2 banh
-R: 0.075                 # (float, default: 0.085 m) wheel radius (in meters per radian)
+L: 0.5                   # (float, default: 0.5 m) khoang cach 2 banh
+R: 0.085                 # (float, default: 0.085 m) wheel radius (in meters per radian)
 K: 30                    # (float, default: 30) He so banh rang dong co (ti so truyen)
-test: "TungNV"
+
+BLVD20KM_SPEED_MIN: 80   # (float, default: 80) so xung toi thieu de dong co quay
+BLVD20KM_SPEED_MAX: 4000 # (float, default: 4000) so xung toi da dong co quay 
+BLVD20KM_TORQUE_MAX: 200 # (float, default: 200) Momen xoan toi da cua dong co
