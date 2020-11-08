@@ -2,7 +2,13 @@
 <launch>
 
   <arg name="driver_left"         default="driver_left"/>
-  <arg name="driver_right"         default="driver_right"/>
+  <arg name="driver_right"        default="driver_right"/>
+
+  <arg name="baudrate"            default="115200"/>
+  <arg name="driver_left_port"    default="/dev/ttyS3"/>
+  <arg name="driver_left_id"      default="1"/>
+  <arg name="driver_right_port"    default="/dev/ttyS4"/>
+  <arg name="driver_right_id"      default="2"/>
   
   <node pkg="driver_blvd_controller" type="driver_control" name="driver_control_node" output="screen">
     <rosparam command="load" file="$(find agv_main)/param/robot_param/robot.yaml" />  
@@ -13,11 +19,15 @@
   <!-- <node pkg="driver_blvd_controller" type="blvd20km_controller" name="Driver_motor_1" args="1 /dev/ttyS3 115200" output="screen"></node>
   <node pkg="driver_blvd_controller" type="blvd20km_controller" name="Driver_motor_2" args="2 /dev/ttyS4 115200" output="screen"></node> -->
 
-  <node pkg="driver_blvd_controller" type="blvd20km_controller" name="driver_motor_left" args="1 /dev/ttyS3 115200" output="screen" ns="$(arg driver_left)">
-    <rosparam command="load" file="$(find agv_main)/param/robot_param/driver.yaml" />  
+  <node pkg="driver_blvd_controller" type="blvd20km_controller" name="driver_left_node"  output="screen" ns="$(arg driver_left)">
+    <param name="baudrate" type="int" value="$(arg baudrate)"/> 
+    <param name="port" type="string" value="$(arg driver_left_port)"/>
+    <param name="id" type="int" value="$(arg driver_left_id)"/>
   </node>
-  <node pkg="driver_blvd_controller" type="blvd20km_controller" name="driver_motor_right" args="2 /dev/ttyS4 115200" output="screen" ns="$(arg driver_right)">
-    <rosparam command="load" file="$(find agv_main)/param/robot_param/driver.yaml" />  
+  <node pkg="driver_blvd_controller" type="blvd20km_controller" name="driver_right_node" output="screen" ns="$(arg driver_right)">
+    <param name="baudrate" type="int" value="$(arg baudrate)"/> 
+    <param name="port" type="string" value="$(arg driver_right_port)"/>
+    <param name="id" type="int" value="$(arg driver_right_id)"/>
   </node>
 
 </launch>

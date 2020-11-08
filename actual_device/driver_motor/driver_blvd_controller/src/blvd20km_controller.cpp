@@ -21,7 +21,23 @@ uint16_t alarm_status[2], feedback_speed[2], warning_status[2];
 int check_connect;
 struct stat sb;
 clock_t begin;
+
 int ID;
+char port[30];    //port name
+int baud;     	  //baud rate 
+
+diagnostic_msgs::DiagnosticArray dir_array;
+diagnostic_msgs::DiagnosticStatus Driver;
+diagnostic_msgs::KeyValue getSpeed;
+diagnostic_msgs::KeyValue alarmRecord;
+diagnostic_msgs::KeyValue warningRecord;
+std_msgs::Header timer;
+driver_blvd_controller::speed_wheel encoder_wheel;
+
+ros::Subscriber cmd_vel_to_wheel;
+ros::Publisher diagnostic_pub;
+ros::Publisher encoder_pub;
+bool loadParam(std::string node_name);
 
 //Process ROS receive from navigation message, send to uController
 void controlWheelCallback(const driver_blvd_controller::speed_wheel& robot)
@@ -31,50 +47,46 @@ void controlWheelCallback(const driver_blvd_controller::speed_wheel& robot)
   	speed[1] = robot.wheel_right;
 } //navigationCallback
 
+bool loadParam(std::string node_name){
+	ROS_INFO("blvd20km_controller.cpp-loadParam() - node_name: %s", node_name.c_str());
+	
+	if(!ros::param::get(node_name + "/baudrate", baud)){
+		return false;
+	}
+	ROS_INFO("blvd20km_controller.cpp- baudrate: %d", baud);
+	std::string port_str;    //port name
+	if(!ros::param::get(node_name + "/port", port_str)){
+		return false;
+	}
+    strcpy(port, port_str.c_str()); // string to char array
+	ROS_INFO("blvd20km_controller.cpp- port: %s", port_str.c_str());
+	if(!ros::param::get(node_name + "/id", ID)){
+		return false;
+	}
+	ROS_INFO("blvd20km_controller.cpp- ID: %d", ID);
+
+	return true;
+}
+
 int main(int argc, char **argv)
 {
-	char port[30];    //port name
-	int baud;     	  //baud rate 
-	//char topicPublish[30]; // topic name
-
-	if (argc > 1) {
-		if(sscanf(argv[1],"%d", &ID)==1) {
-			ROS_INFO("blvd20km_controller.cpp-44-ID = %d", ID);
-		}else{
-			ROS_ERROR("blvd20km_controller.cpp-47-ucontroller index parameter invalid");
-			return 1;
-		}
-	}else{
-		ID = DEFAULT_ID;
-	}
-
-	strcpy(port, DEFAULT_SERIALPORT);
-	if (argc > 2)
-		strcpy(port, argv[2]);
-
-	baud = DEFAULT_BAUDRATE;
-	if (argc > 3) {
-		if(sscanf(argv[3],"%d", &baud)!=1) {
-		  ROS_ERROR("blvd20km_controller.cpp-62-ucontroller baud rate parameter invalid");
-		  return 1;
-		}
-	}
-
 	/*create ros node*/
-	ros::init(argc, argv, "driver_motor");
+	ros::init(argc, argv, "blvd20km_controller");
 	ros::NodeHandlePtr nh = boost::make_shared<ros::NodeHandle>();
+
+	std::string node_name = ros::this_node::getName();
+	ROS_INFO("blvd20km_controller.cpp-node_name: %s", node_name.c_str());
+	if(loadParam(node_name)){
+		ROS_INFO("blvd20km_controller.cpp-Load parameter successfull");
+	}else{
+		ROS_ERROR("blvd20km_controller.cpp-Error when load parameter");
+	}
+
 	/* Subscriber */
-	ros::Subscriber cmd_vel_to_wheel = nh->subscribe("control_wheel", 20, controlWheelCallback); 
+	cmd_vel_to_wheel = nh->subscribe("control_wheel", 20, controlWheelCallback); 
 	/* Publisher */
-	ros::Publisher diagnostic_pub = nh->advertise<diagnostic_msgs::DiagnosticArray>("diagnostics", 20);
-	ros::Publisher encoder_pub = nh->advertise<driver_blvd_controller::speed_wheel>("encoder_wheel", 20);
-    
-	diagnostic_msgs::DiagnosticArray dir_array;
-	diagnostic_msgs::DiagnosticStatus Driver;
-	diagnostic_msgs::KeyValue getSpeed;
-	diagnostic_msgs::KeyValue alarmRecord;
-	diagnostic_msgs::KeyValue warningRecord;
-	std_msgs::Header timer;
+	diagnostic_pub = nh->advertise<diagnostic_msgs::DiagnosticArray>("diagnostics", 20);
+	encoder_pub = nh->advertise<driver_blvd_controller::speed_wheel>("encoder_wheel", 20);
 
 	ros::Time a_little_after_the_beginning(0, 1000000);
 	timer.frame_id = "driverID";
@@ -84,7 +96,6 @@ int main(int argc, char **argv)
 	Driver.hardware_id = std::to_string(ID);
 
 	ros::Rate loop_rate(20); 
-	driver_blvd_controller::speed_wheel encoder_wheel;
 	while(ros::ok())
 	{
 		/* onpen comport */
@@ -115,58 +126,58 @@ int main(int argc, char **argv)
 				break;
 			} 
 
-			if(speed[ID-1] > 0){
-				writeForward(ID);
-			}else if(speed[ID-1] < 0){
-				writeReverse(ID);
-			}else writeStop(ID);
+	// 		if(speed[ID-1] > 0){
+	// 			writeForward(ID);
+	// 		}else if(speed[ID-1] < 0){
+	// 			writeReverse(ID);
+	// 		}else writeStop(ID);
 
-			writeSpeed(ID, abs(speed[ID-1]));
-			feedbackSpeed(ID, &feedback_speed[ID-1]);
-			readAlarm(ID, &alarm_status[ID-1]);
-			readWarning(ID, &warning_status[ID-1]);
+	// 		writeSpeed(ID, abs(speed[ID-1]));
+	// 		feedbackSpeed(ID, &feedback_speed[ID-1]);
+	// 		readAlarm(ID, &alarm_status[ID-1]);
+	// 		readWarning(ID, &warning_status[ID-1]);
 
-			// if(ID = 1) {
-			// 	encoder_wheel.wheel_letf =  feedback_speed[0]; 
-			// }else{
-			// 	encoder_wheel.wheel_right =  feedback_speed[1]; 
-			// }
-			//encoder_pub.publish(encoder_wheel);
+	// 		// if(ID = 1) {
+	// 		// 	encoder_wheel.wheel_letf =  feedback_speed[0]; 
+	// 		// }else{
+	// 		// 	encoder_wheel.wheel_right =  feedback_speed[1]; 
+	// 		// }
+	// 		//encoder_pub.publish(encoder_wheel);
 			
-			Driver.values.clear();
+	// 		Driver.values.clear();
 			
-			if (check_connect != 0){
-				Driver.level = diagnostic_msgs::DiagnosticStatus::ERROR;
-				Driver.message = "Driver disconnected. Check connection,plaese!!";
-			}else if(alarm_status[ID-1] != 0){
-				Driver.level = diagnostic_msgs::DiagnosticStatus::ERROR;
-				Driver.message = "Driver is alarm. Reset device, please!!";
-			}else if (warning_status[ID-1] !=0){
-				Driver.level = diagnostic_msgs::DiagnosticStatus::WARN;
-				Driver.message = " Warning from driver. Attention!!";
-			}else{
-				Driver.level = diagnostic_msgs::DiagnosticStatus::OK;
-				Driver.message = "Driver seem to be ok.";
-			}
+	// 		if (check_connect != 0){
+	// 			Driver.level = diagnostic_msgs::DiagnosticStatus::ERROR;
+	// 			Driver.message = "Driver disconnected. Check connection,plaese!!";
+	// 		}else if(alarm_status[ID-1] != 0){
+	// 			Driver.level = diagnostic_msgs::DiagnosticStatus::ERROR;
+	// 			Driver.message = "Driver is alarm. Reset device, please!!";
+	// 		}else if (warning_status[ID-1] !=0){
+	// 			Driver.level = diagnostic_msgs::DiagnosticStatus::WARN;
+	// 			Driver.message = " Warning from driver. Attention!!";
+	// 		}else{
+	// 			Driver.level = diagnostic_msgs::DiagnosticStatus::OK;
+	// 			Driver.message = "Driver seem to be ok.";
+	// 		}
 
-			getSpeed.key = "Feed back speed";
-			getSpeed.value = std::to_string((int16_t)feedback_speed[ID-1]);
-			Driver.values.push_back(getSpeed);
+	// 		getSpeed.key = "Feed back speed";
+	// 		getSpeed.value = std::to_string((int16_t)feedback_speed[ID-1]);
+	// 		Driver.values.push_back(getSpeed);
 
-			warningRecord.key = "Warning record";
-			warningRecord.value = std::to_string(warning_status[ID-1]);
-			Driver.values.push_back(warningRecord);
+	// 		warningRecord.key = "Warning record";
+	// 		warningRecord.value = std::to_string(warning_status[ID-1]);
+	// 		Driver.values.push_back(warningRecord);
 
-			alarmRecord.key = "Alarm record";
-			alarmRecord.value = std::to_string(alarm_status[ID-1]);
-			Driver.values.push_back(alarmRecord);
-			dir_array.status.push_back(Driver);
+	// 		alarmRecord.key = "Alarm record";
+	// 		alarmRecord.value = std::to_string(alarm_status[ID-1]);
+	// 		Driver.values.push_back(alarmRecord);
+	// 		dir_array.status.push_back(Driver);
 
-			timer.stamp.nsec = ros::Time::now().toNSec();
-			timer.stamp.sec = ros::Time::now().toSec();
-			dir_array.header = timer;
+	// 		timer.stamp.nsec = ros::Time::now().toNSec();
+	// 		timer.stamp.sec = ros::Time::now().toSec();
+	// 		dir_array.header = timer;
 		
-			diagnostic_pub.publish(dir_array);
+	// 		diagnostic_pub.publish(dir_array);
 	
 			loop_rate.sleep();
 			ros::spinOnce();
